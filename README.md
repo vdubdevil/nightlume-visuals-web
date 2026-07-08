@@ -56,7 +56,7 @@ A few deliberate design decisions worth knowing before contributing:
 
 Nightlume ships as a **static launcher** — no MCP dev environment or manual build required to run it.
 
-1. Download the latest launcher build from [Releases](#).
+1. Download the latest launcher build from [Releases](https://nightlume.pages.dev).
 2. Run the launcher and select your Minecraft 1.16.5 + OptiFine installation.
 3. Launch the game through the launcher.
 
@@ -92,7 +92,7 @@ Nightlume Environment is a visual/cosmetic client modification. It does not incl
 
 ## License
 
-_No license has been set yet — all rights reserved by default until one is added.
+No license has been set yet — all rights reserved by default until one is added.
 
 ---
 

@@ -1,6 +1,6 @@
 /*
- * NIGHTLUME ALL-IN-ONE ENGINE v1.1
- * United script for the whole HTML
+ * NIGHTLUME ALL-IN-ONE ENGINE v2.0.2 - CINEMATIC CLI EDITION
+ * Fixed missing printAsciiLogo invocation inside the boot flow.
  */
 
 const legalContent = {
@@ -59,51 +59,315 @@ const setupIntro = (id) => {
     });
 };
 
-/* ─── TERMINAL ────────────────────────────────────────────────────────────── */
+/* ─── TERMINAL SYSTEM ────────────────────────────────────────────────────── */
 
 const startTerminal = () => {
     const consoleBox = document.getElementById('console');
     if (!consoleBox) return;
 
-    const asciiLogo = ` _  _ _       _     _   _                        
-| \\ | (_)     | |   | | | |                       
-|  \\| |_  __ _| |__ | |_| |_   _ _ __ ___   ___ 
-| . \` | |/ _\` | '_ \\| __| | | | | '_ \` _ \\ / _ \\
-| |\\  | | (_| | | | | |_| | |_| | | | | | |  __/
-|_| \\_|_|\\__, |_| |_|\\__|_|\\__,_|_| |_| |_|\\___|
-           __/ |                                 
-          |___/                                  `;
+    // Configuration Attributes
+    const HOSTNAME_VAL = "nightlume";
+    const USER_VAL = "vdubdevil";
+    const VERSION_VAL = "Nightlume Core OS v1.2-stable (Build 2026.07)";
+    
+    // Modify target release parameters here
+    const TARGET_RELEASE = new Date("2026-07-27T23:59:59");
 
-    const lines = [
-        `<span class="ascii-logo">${asciiLogo}</span>`,
-        '<span class="success">Welcome to Nightlume environment.</span>',
-        '',
-        '<span class="cmd">Release Target: July 2026</span>',
-        '<span class="cmd">Status: Active development</span>',
-        '<span class="cmd">Countdown: <span id="release-countdown" class="green">calculating...</span></span>',
-	'<span class="cmd"></span>',
-	'<span class="cmd">> nl.push supported-plat</span>',
-	'checking platform targets...',
-	'[√] Windows 10 LTSC',
-	'[√] Windows 11 LTSC',
-	'[×] Linux Mint',
-	'[×] Debian',
-	'[×] Arch Linux',
-	'[×] NixOS'
+    const asciiLogo = `   .-----------------.
+ .#####################.
+#######---         ----
+####  ..###############..  	 _   _ _        _     _   _                        
+#### #################### 	| \\ | |(_)    | |   | | | |                       
+#### #################### 	|  \\| |_  __ \`| |__ | |_| |_   _ _ __ ___   ___ 
+#### ####################    	| . \` | |/ _\` | '_ \\| __| | | | | '_ \` _ \\ / _ \\
+#### ####################    	| |\\  | | (_| | | | | |_| | |_| | | | | | |  __/
+####  ''##############''     	|_| \\_|_|\\__, |_| |_|\\__|_|\\__,_|_| |_| |_|\\___|
+ #######---         ----              __/ |                                
+  '####################'              |___/                                 
+    '-----------------'   `;
 
-    ];
+    const randomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-    let idx = 0;
-    const type = () => {
-        if (idx >= lines.length) return;
-        const line = document.createElement('div');
-        line.innerHTML = lines[idx];
-        consoleBox.appendChild(line);
-        consoleBox.scrollTop = consoleBox.scrollHeight;
-        idx++;
-        setTimeout(type, idx === 1 ? 100 : 400);
+    const getCountdownString = () => {
+        const now = new Date();
+        if (now > TARGET_RELEASE) {
+            return `<span style="color:#00ffaa; font-weight:bold;">LIVE NOW</span>`;
+        }
+
+        const diff = TARGET_RELEASE - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        return `<span style="color:#00ffaa; font-weight:bold;">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
     };
-    setTimeout(type, 2200);
+
+    const typeText = (element, htmlText, speed = 6, callback) => {
+        let i = 0;
+        element.innerHTML = "";
+        
+        const div = document.createElement('div');
+        div.innerHTML = htmlText;
+        const plainText = div.innerText || div.textContent || "";
+        const completeHTML = htmlText;
+
+        const interval = setInterval(() => {
+            if (i <= plainText.length) {
+                element.innerText = plainText.substring(0, i);
+                consoleBox.scrollTop = consoleBox.scrollHeight;
+                i++;
+            } else {
+                clearInterval(interval);
+                element.innerHTML = completeHTML;
+                if (callback) callback();
+            }
+        }, speed);
+    };
+
+    const appendRow = (htmlContent, isBreak = false, height = "auto") => {
+        const row = document.createElement('div');
+        row.className = 'terminal-row';
+        row.style.margin = '0';
+        row.style.padding = '0';
+        if (isBreak) {
+            row.style.height = height;
+        } else {
+            row.innerHTML = htmlContent;
+        }
+        consoleBox.appendChild(row);
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+        return row;
+    };
+
+    const printAsciiLogo = () => {
+        appendRow(`<pre class="ascii-logo" style="line-height: 1.2; margin: 0; color: #00ffaa;">${asciiLogo}</pre>`);
+        appendRow(`<span class="white-text"> » NEXT STABLE RELEASE: </span>${getCountdownString()}`);
+        appendRow('', true, '1.5em');
+    };
+
+    /* ─── CINEMATIC BOOT LOGIC ───────────────────────────────────────────── */
+    const runCinematicBoot = async () => {
+        // 1. Prints your exact Ascii Logo & Stable Release Countdown Header first
+        printAsciiLogo();
+        await new Promise(r => setTimeout(r, 600));
+
+        // 2. Begins System Boot Log Streams
+        appendRow('<span class="welcome-green">Nightlume bootstrap initialized.</span>');
+        await new Promise(r => setTimeout(r, randomDelay(150, 300)));
+        
+        appendRow('<span class="white-text">Establishing secure sandbox connection...</span>');
+        await new Promise(r => setTimeout(r, randomDelay(400, 700)));
+        
+        const checks = [
+            "Loading graphics subsystem...",
+            "Mounting virtual filesystem...",
+            "Starting authentication daemon...",
+            "Loading NightCore modules...",
+            "Verifying render engine...",
+            "Connecting to secure node..."
+        ];
+        
+        for (const check of checks) {
+            appendRow(`[ <span style="color:#00ffaa; font-weight:bold;">  OK   </span> ] ${check}`);
+            await new Promise(r => setTimeout(r, randomDelay(80, 450)));
+        }
+
+        appendRow('', true, '0.5em');
+        appendRow(`<span class="cmd" style="color: #00ff88;">${USER_VAL}@${HOSTNAME_VAL}:~$ </span><span class="white-text" id="simulated-typing"></span>`);
+        const typingSpan = document.getElementById('simulated-typing');
+        const targetCmdStr = "sudo apt install nightlume-core";
+        
+        for (let i = 0; i <= targetCmdStr.length; i++) {
+            if (typingSpan) typingSpan.textContent = targetCmdStr.substring(0, i);
+            await new Promise(r => setTimeout(r, 400 / targetCmdStr.length));
+        }
+        await new Promise(r => setTimeout(r, 400));
+        
+        appendRow('<span class="white-text">Reading package lists... Done</span>');
+        await new Promise(r => setTimeout(r, 250));
+        appendRow('<span class="white-text">Building dependency tree... Done</span>');
+        await new Promise(r => setTimeout(r, 350));
+        
+        appendRow('<span class="white-text">Downloading nightlume-core... </span>');
+        const progressRow = appendRow('<span id="pbar" style="color:#00ffaa; font-family:monospace;"></span>');
+        const pbarSpan = document.getElementById('pbar');
+        const barWidth = 24;
+
+        let percent = 0;
+        while (percent <= 100) {
+            const progress = Math.floor((barWidth * percent) / 100);
+            const barStr = `\r[${"█".repeat(progress)}${".".repeat(barWidth - progress)}] ${String(percent).padStart(3, ' ')}% Complete`;
+            if (pbarSpan) pbarSpan.textContent = barStr;
+            
+            if (percent === 100) break;
+
+            let pause = randomDelay(20, 70);
+            if (percent >= 75 && percent <= 80) pause = randomDelay(200, 400);
+            if (percent >= 93 && percent <= 96) pause = randomDelay(150, 350);
+            await new Promise(r => setTimeout(r, pause));
+
+            percent += Math.floor(Math.random() * 3) + 1;
+            if (percent > 100) percent = 100;
+        }
+
+        appendRow('', true, '0.5em');
+        appendRow('<span class="welcome-green">Unpacking nightlume-core (v1.2-stable)... Done</span>');
+        await new Promise(r => setTimeout(r, 450));
+        appendRow('', true, '0.5em');
+
+        appendRow(`<span class="white-text">Target Launch Countdown: </span>${getCountdownString()}`);
+        appendRow('', true, '0.5em');
+        await new Promise(r => setTimeout(r, 500));
+
+        appendRow('<span style="color: gray;">Launching interactive shell interface orchestration layers...</span>');
+        appendRow('', true, '0.5em');
+        await new Promise(r => setTimeout(r, 800));
+
+        spawnInteractiveInput();
+    };
+
+    runCinematicBoot();
+
+    const spawnInteractiveInput = () => {
+        const existingInput = document.getElementById('terminal-stdin');
+        if (existingInput) {
+            existingInput.removeAttribute('id');
+            existingInput.disabled = true;
+        }
+
+        const inputRow = document.createElement('div');
+        inputRow.className = 'terminal-interactive-row';
+        inputRow.style.display = 'flex';
+        inputRow.style.alignItems = 'center';
+        inputRow.style.margin = '0';
+        inputRow.style.padding = '0';
+        
+        const currentPrompt = `${USER_VAL}@${HOSTNAME_VAL}:~$ `;
+
+        inputRow.innerHTML = `
+            <span class="cmd" style="white-space: pre; flex-shrink: 0; color: #00ff88;">${currentPrompt}</span>
+            <div class="terminal-input-wrapper" style="flex-grow: 1; display: flex; position: relative;">
+                <input type="text" id="terminal-stdin" autofocus autocomplete="off" spellcheck="false" 
+                       style="background: transparent; border: none; color: #fff; outline: none; font-family: inherit; 
+                       font-size: inherit; width: 100%; padding: 0; margin: 0;">
+            </div>
+        `;
+        consoleBox.appendChild(inputRow);
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+
+        const stdin = document.getElementById('terminal-stdin');
+        if (!stdin) return;
+        stdin.focus();
+        
+        const focusHandler = () => stdin.focus();
+        consoleBox.addEventListener('click', focusHandler);
+
+        stdin.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const rawCmd = stdin.value;
+                const normalizedCmd = rawCmd.trim();
+
+                consoleBox.removeEventListener('click', focusHandler);
+                stdin.disabled = true;
+                inputRow.innerHTML = `<span class="cmd" style="color: #00ff88;">${currentPrompt}</span><span class="white-text">${rawCmd}</span>`;
+
+                processUserCommand(normalizedCmd);
+            }
+        });
+    };
+
+    const triggerClearScreen = () => {
+        consoleBox.innerHTML = '';
+        spawnInteractiveInput();
+    };
+
+    const invokePreLaunchTeaser = async (outputDiv) => {
+        outputDiv.innerHTML = `<span class="white-text">Checking repository...</span>`;
+        await new Promise(r => setTimeout(r, 400));
+        outputDiv.innerHTML += `\n<span class="white-text">Latest origin commit: </span><span class="welcome-green">7baf2cd</span>`;
+        await new Promise(r => setTimeout(r, 300));
+        outputDiv.innerHTML += `\n<span class="white-text">Comparing localized pre-build payload... </span><span class="welcome-green">MATCHED</span>`;
+        await new Promise(r => setTimeout(r, 500));
+        
+        outputDiv.innerHTML += `\n\n<span class="welcome-green">[SYSTEM NOTICE] NIGHTLUME CORE ENGINE ENCRYPTION ACTIVE.</span>`;
+        outputDiv.innerHTML += `\n<span class="white-text">The rendering pipeline modules are safely staging behind the firewall.</span>`;
+        outputDiv.innerHTML += `\n<span class="white-text">Time remaining until master deployment signature drops: </span>${getCountdownString()}\n\n`;
+        
+        spawnInteractiveInput();
+    };
+
+    const processUserCommand = (cmdStr) => {
+        const parts = cmdStr.trim().split(/\s+/);
+        const command = parts[0].toLowerCase();
+
+        if (command === 'clear') {
+            triggerClearScreen();
+            return;
+        }
+        if (command === '') {
+            spawnInteractiveInput();
+            return;
+        }
+
+        const outputDiv = document.createElement('div');
+        outputDiv.className = 'terminal-row';
+        outputDiv.style.margin = '0';
+        outputDiv.style.padding = '0';
+        outputDiv.style.whiteSpace = 'pre-wrap';
+        consoleBox.appendChild(outputDiv);
+
+        let finalHTML = "";
+        switch (command) {
+            case 'help':
+                finalHTML = `Available Launcher Utility Blocks:
+
+help        Show this local environment diagnostics helper
+status      Display dynamic environment framework status logs
+countdown   Check updated real-time engine release clock
+clear       Flush current terminal terminal sequence matrix
+date        Print machine tracking runtime clock configuration
+version     Print core metadata distribution identity properties
+launch      Invoke localized target application virtual runtimes
+exit        Terminate local session bindings safely`;
+                break;
+
+            case 'status':
+                finalHTML = `System Core Launcher Matrix: <span class="welcome-green">ONLINE // PRE-LAUNCH SANDBOX</span>\nTarget Pipeline Status:      <span style="color:#ff4444;">LOCKED</span> (Staging Deployment)`;
+                break;
+
+            case 'countdown':
+                finalHTML = `<span class="white-text">Time Remaining Until Deployment: </span>${getCountdownString()}`;
+                break;
+
+            case 'date':
+                finalHTML = new Date().toISOString();
+                break;
+
+            case 'version':
+                finalHTML = VERSION_VAL;
+                break;
+
+            case 'launch':
+                invokePreLaunchTeaser(outputDiv);
+                return;
+
+            case 'exit':
+                finalHTML = `<span style="color:gray;">Session bindings dropped. Goodbye.</span>`;
+                typeText(outputDiv, finalHTML, 3, () => {
+                    setTimeout(() => { window.close(); }, 1000);
+                });
+                return;
+
+            default:
+                finalHTML = `<span style="color:#ff4444;">bash: ${command}: command not found. Type 'help' for tracking diagnostics.</span>`;
+                break;
+        }
+
+        typeText(outputDiv, finalHTML, 3, () => {
+            spawnInteractiveInput();
+        });
+    };
 };
 
 /* ─── SLIDER ──────────────────────────────────────────────────────────────── */
@@ -115,7 +379,6 @@ const initSlider = () => {
 
     let currentIndex = 0;
     let scrollInterval;
-
     const scrollToSlide = (index) => {
         const target = document.getElementById(`ds-${index + 1}`);
         if (!target) return;
@@ -123,7 +386,6 @@ const initSlider = () => {
         navDots.forEach(dot => dot.style.background = '#222');
         navDots[index].style.background = '#fff';
     };
-
     const startAuto = () => {
         scrollInterval = setInterval(() => {
             currentIndex = (currentIndex + 1) % navDots.length;
@@ -139,7 +401,6 @@ const initSlider = () => {
             scrollToSlide(currentIndex);
         });
     });
-
     container.addEventListener('mouseenter', () => clearInterval(scrollInterval));
     container.addEventListener('mouseleave', startAuto);
     startAuto();
@@ -151,7 +412,6 @@ const checkAuth = () => {
     const session = getSession();
     const lock = document.getElementById('auth-lock');
     const selectors = document.querySelectorAll('.plan-grid, .card-selector, .submit-btn');
-
     if (lock && !session) {
         lock.style.display = 'block';
         selectors.forEach(el => {
@@ -170,7 +430,6 @@ window.showLegal = function (type, btn) {
 
     body.style.opacity = '0';
     body.style.transform = 'translateY(10px)';
-
     setTimeout(() => {
         tabs.forEach(t => t.classList.remove('active'));
         btn.classList.add('active');
@@ -208,13 +467,12 @@ const hideModal = (modal) => {
 
 /* ─── PROFILE PAGE ────────────────────────────────────────────────────────── */
 
-const initProfile = (userNameDisplay, logoutBtn) => {
+const initProfile = async (userNameDisplay, logoutBtn) => {
     const sessionData = getSession();
     const loginTime = localStorage.getItem('login_timestamp');
     const modal = document.getElementById('custom-confirm');
     const yesBtn = document.getElementById('confirm-yes');
     const noBtn = document.getElementById('confirm-no');
-
     if (!sessionData) {
         redirectTo("signup.html");
         return;
@@ -233,6 +491,24 @@ const initProfile = (userNameDisplay, logoutBtn) => {
     const stEl = document.getElementById('u-session-time');
     if (stEl) stEl.innerText = loginTime || new Date().toLocaleTimeString();
 
+    const regionEl = document.getElementById('u-region');
+    if (regionEl) {
+        regionEl.innerText = "LOCATING NODE...";
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('API down');
+            
+            const data = await response.json();
+            const city = data.city || "UNKNOWN";
+            const country = data.country_name || "REMOTE NODE";
+            
+            regionEl.innerText = `${city.toUpperCase()}, ${country.toUpperCase()}`;
+        } catch (error) {
+            console.error('[SESSION] Failed to resolve region:', error);
+            regionEl.innerText = "UNKNOWN REGION";
+        }
+    }
+
     if (logoutBtn && modal) {
         logoutBtn.innerHTML = `
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5">
@@ -240,12 +516,10 @@ const initProfile = (userNameDisplay, logoutBtn) => {
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg> Logout`;
-
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             showModal(modal);
         });
-
         yesBtn.addEventListener('click', () => {
             hideModal(modal);
             setTimeout(() => {
@@ -253,7 +527,6 @@ const initProfile = (userNameDisplay, logoutBtn) => {
                 redirectTo("signup.html");
             }, 200);
         });
-
         noBtn.addEventListener('click', () => hideModal(modal));
     }
 };
@@ -346,7 +619,6 @@ const initPassForm = (passForm, passMsg) => {
 /* ─── INIT ────────────────────────────────────────────────────────────────── */
 
 document.addEventListener('DOMContentLoaded', () => {
-
     setupNeon('logo-neon');
     setupNeon('title');
     setupIntro('intro');
@@ -397,7 +669,6 @@ window.toggleMode = function () {
 
     card.classList.toggle('mode-register');
     const isRegister = card.classList.contains('mode-register');
-
     if (title) title.innerText = isRegister ? "Registration" : "Login";
     if (footerB) footerB.innerText = isRegister ? "LOGIN" : "REGISTER";
 };
@@ -440,31 +711,35 @@ const injectAuth = () => {
             </div>`;
 
         const profileBtn = document.getElementById('nav-profile-btn');
-        profileBtn.addEventListener('mouseenter', () => {
-            profileBtn.style.borderColor = '#fff';
-            profileBtn.style.background = '#fff';
-            profileBtn.style.color = '#000';
-            profileBtn.querySelector('svg').style.stroke = '#000';
-        });
-        profileBtn.addEventListener('mouseleave', () => {
-            profileBtn.style.borderColor = '#333';
-            profileBtn.style.background = 'transparent';
-            profileBtn.style.color = '#fff';
-            profileBtn.querySelector('svg').style.stroke = 'currentColor';
-        });
+        if (profileBtn) {
+            profileBtn.addEventListener('mouseenter', () => {
+                profileBtn.style.borderColor = '#fff';
+                profileBtn.style.background = '#fff';
+                profileBtn.style.color = '#000';
+                profileBtn.querySelector('svg').style.stroke = '#000';
+            });
+            profileBtn.addEventListener('mouseleave', () => {
+                profileBtn.style.borderColor = '#333';
+                profileBtn.style.background = 'transparent';
+                profileBtn.style.color = '#fff';
+                profileBtn.querySelector('svg').style.stroke = 'currentColor';
+            });
+        }
         const logoutBtn = document.getElementById('nav-logout-btn');
-        logoutBtn.addEventListener('mouseenter', () => {
-            logoutBtn.style.background = '#ff4444';
-            logoutBtn.style.color = '#fff';
-            logoutBtn.style.borderColor = '#ff4444';
-        });
-        logoutBtn.addEventListener('mouseleave', () => {
-            logoutBtn.style.background = 'transparent';
-            logoutBtn.style.color = '#ff4444';
-            logoutBtn.style.borderColor = 'rgba(255,68,68,0.3)';
-        });
+        if (logoutBtn) {
+            logoutBtn.addEventListener('mouseenter', () => {
+                logoutBtn.style.background = '#ff4444';
+                logoutBtn.style.color = '#fff';
+                logoutBtn.style.borderColor = '#ff4444';
+            });
+            logoutBtn.addEventListener('mouseleave', () => {
+                logoutBtn.style.background = 'transparent';
+                logoutBtn.style.color = '#ff4444';
+                logoutBtn.style.borderColor = 'rgba(255,68,68,0.3)';
+            });
+        }
         const modal = document.getElementById('custom-confirm');
-        if (modal) {
+        if (modal && logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 showModal(modal);
@@ -481,7 +756,7 @@ const injectAuth = () => {
                     hideModal(modal);
                 }, { once: true });
             });
-        } else {
+        } else if (logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 localStorage.clear();

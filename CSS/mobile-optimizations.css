@@ -8,7 +8,7 @@
    1. GLOBAL SAFEGUARDS — apply on every page regardless of breakpoint
    ──────────────────────────────────────────────────────────────────────── */
 
-img, svg, video, iframe { max-width: 100%; height: auto; display: block; }
+img, svg, video, iframe { max-width: 100%; height: auto; }
 
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 

@@ -68,7 +68,7 @@ const startTerminal = () => {
     // Configuration Attributes
     const HOSTNAME_VAL = "nightlume";
     const USER_VAL = "vdubdevil";
-    const VERSION_VAL = "Nightlume Core OS v1.2-stable (Build 2026.07)";
+    const VERSION_VAL = "Nightlume Core OS v1.9-stable (Build 2026.07)";
     
     // Modify target release parameters here
     const TARGET_RELEASE = new Date("2026-07-19T23:59:59");
@@ -212,7 +212,7 @@ const startTerminal = () => {
         }
 
         appendRow('', true, '0.5em');
-        appendRow('<span class="welcome-green">Unpacking nightlume-core (v1.2-stable)... Done</span>');
+        appendRow('<span class="welcome-green">Unpacking nightlume-core (v1.0-stable)... Done</span>');
         await new Promise(r => setTimeout(r, 450));
         appendRow('', true, '0.5em');
 

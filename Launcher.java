@@ -179,69 +179,61 @@ public class Launcher {
         System.out.println(WHITE + "Initializing runtime environment verification..." + RESET);
         sleep(300);
 
-        // Получаем абсолютный путь к текущей папке (%AppData%\Nightlume)
-        String absoluteWorkingDir = new File(".").getAbsolutePath();
-        // Избавляемся от точки в конце пути, если она есть
-        if (absoluteWorkingDir.endsWith(".")) {
-            absoluteWorkingDir = absoluteWorkingDir.substring(0, absoluteWorkingDir.length() - 1);
-        }
-        if (absoluteWorkingDir.endsWith(File.separator)) {
-            absoluteWorkingDir = absoluteWorkingDir.substring(0, absoluteWorkingDir.length() - 1);
+        // Получаем точный абсолютный путь, где запущен наш джарник
+        String currentDir = new File(".").getAbsolutePath();
+        if (currentDir.endsWith(".")) {
+            currentDir = currentDir.substring(0, currentDir.length() - 1);
         }
 
-        System.out.println(WHITE + "Target game directory: " + GREEN + absoluteWorkingDir + RESET);
+        System.out.println(WHITE + "Working Directory: " + GREEN + currentDir + RESET);
 
         String pathSeparator = System.getProperty("path.separator");
-        String nativePath = absoluteWorkingDir + File.separator + "libraries" + File.separator + "natives";
-        String clientJarPath = absoluteWorkingDir + File.separator + "Nightlume.jar";
-        String librariesMask = absoluteWorkingDir + File.separator + "libraries" + File.separator + "*";
 
-        // Формируем четкую команду запуска Майнкрафт 1.16.5 с абсолютными путями
+        // Собираем пути к папкам
+        File libsFolder = new File("libraries");
+        StringBuilder classpath = new StringBuilder("Nightlume.jar");
+
+        // Явно добавляем каждый .jar из папки libraries в Classpath, чтобы Java их точно увидела
+        if (libsFolder.exists() && libsFolder.isDirectory()) {
+            File[] files = libsFolder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.getName().endsWith(".jar")) {
+                        classpath.append(pathSeparator).append("libraries/").append(file.getName());
+                    }
+                }
+            }
+        }
+
         List<String> command = new ArrayList<>();
         command.add("java");
         command.add("-Xmx2G");
-        command.add("-Djava.library.path=" + nativePath);
+        command.add("-Djava.library.path=libraries/natives");
         command.add("-cp");
-        command.add(clientJarPath + pathSeparator + librariesMask);
+        command.add(classpath.toString()); // Передаем собранную строку библиотек
         command.add("net.minecraft.client.main.Main");
         command.add("--username");
         command.add("Player_" + (100 + random.nextInt(900)));
         command.add("--version");
         command.add("1.16.5");
         command.add("--gameDir");
-        command.add(absoluteWorkingDir);
+        command.add(".");
         command.add("--assetsDir");
-        command.add(absoluteWorkingDir + File.separator + "assets");
+        command.add("assets");
         command.add("--assetIndex");
         command.add("1.16");
 
         System.out.println(GRAY + "Spawning native JVM thread..." + RESET);
-        sleep(400);
 
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
-            pb.directory(new File(absoluteWorkingDir)); // Принудительно ставим рабочую папку
-
-            // ВАЖНО: Если игра падает, нам нужно перенаправить поток ошибок в консоль, чтобы увидеть лог краша!
-            pb.redirectErrorStream(true);
+            pb.directory(new File("."));
             pb.inheritIO();
 
             System.out.println(GREEN + "[SUCCESS] Minecraft processes invoked. Handoff complete." + RESET);
             sleep(500);
 
-            Process process = pb.start();
-
-            // Даем игре 1-2 секунды на запуск. Если она сразу упадет — мы успеем прочитать ошибку в консоли
-            sleep(1500);
-
-            // Проверяем, жив ли процесс игры. Если он умер — лаунчер не закроется и покажет логи краша
-            if (!process.isAlive()) {
-                System.out.println(RED + "[CRASH] Minecraft process terminated unexpectedly. Check output above." + RESET);
-                // Даем пользователю нажать Enter, чтобы окно консоли не закрылось сразу
-                System.out.println(WHITE + "Press Enter to exit..." + RESET);
-                scanner.nextLine();
-            }
-
+            pb.start();
             System.exit(0);
 
         } catch (IOException e) {

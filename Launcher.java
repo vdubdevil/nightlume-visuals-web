@@ -7,7 +7,6 @@ import java.util.*;
 
 public class Launcher {
 
-    // Style Constants matching the Web CLI Matrix
     private static final String RESET = "\u001B[0m";
     private static final String GREEN = "\u001B[38;2;0;255;170m";
     private static final String CMD_GREEN = "\u001B[38;2;0;255;136m";
@@ -19,14 +18,12 @@ public class Launcher {
     private static final String HOSTNAME_VAL = "nightlume";
     private static final String VERSION_VAL = "Nightlume Launcher Core v1.0-stable (Build 2026.07)";
 
-    // Countdown target adjusted to avoid negative evaluation traps
     private static final LocalDateTime TARGET_RELEASE = LocalDateTime.of(2026, Month.JULY, 20, 0, 0, 0);
 
     private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
 
     public static void main(String[] args) {
-        // Enforce UTF-8 to protect console output stream rendering
         try {
             System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8.name()));
         } catch (UnsupportedEncodingException ignored) {}
@@ -107,22 +104,6 @@ public class Launcher {
         spawnInteractiveShell();
     }
 
-    private static void printCountdownString() {
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isAfter(TARGET_RELEASE)) {
-            System.out.print(GREEN + "LIVE NOW" + RESET);
-            return;
-        }
-
-        Duration duration = Duration.between(now, TARGET_RELEASE);
-        long days = duration.toDays();
-        long hours = duration.toHoursPart();
-        long minutes = duration.toMinutesPart();
-        long seconds = duration.toSecondsPart();
-
-        System.out.print(GREEN + String.format("%dd %dh %dm %ds", days, hours, minutes, seconds) + RESET);
-    }
-
     private static void spawnInteractiveShell() {
         while (true) {
             System.out.print(CMD_GREEN + USER_VAL + "@" + HOSTNAME_VAL + ":~$ " + RESET);
@@ -196,7 +177,6 @@ public class Launcher {
         System.out.println(WHITE + "Target game directory: " + GREEN + baseDir.getAbsolutePath() + RESET);
 
         String pathSeparator = System.getProperty("path.separator");
-
         String clientJarPath = baseDir.getAbsolutePath() + File.separator + "Nightlume.jar";
         String classpathLibs = baseDir.getAbsolutePath() + File.separator + "libraries" + File.separator + "*";
 
@@ -205,7 +185,7 @@ public class Launcher {
         command.add("-Xmx2G");
         command.add("-Djava.library.path=" + baseDir.getAbsolutePath() + File.separator + "libraries" + File.separator + "natives");
         command.add("-cp");
-        command.add("." + pathSeparator + clientJarPath + pathSeparator + classpathLibs);
+        command.add(clientJarPath + pathSeparator + classpathLibs);
         command.add("net.minecraft.client.main.Main");
         command.add("--username");
         command.add("Player_" + (100 + random.nextInt(900)));
@@ -238,7 +218,7 @@ public class Launcher {
         } catch (Exception e) {
             System.out.println(RED + "[ERROR] Failed to execute java command: " + e.getMessage() + RESET);
         }
-    } // Вот эта скобка была пропущена!
+    }
 
     private static void typeText(String text, int delay) {
         for (char ch : text.toCharArray()) {
@@ -277,6 +257,6 @@ public class Launcher {
     }
 
     private static int randomDelay(int min, int max) {
-        return random.nextInt((max - min) + 1) + min;
+        return random.nextInt((max - min) + min);
     }
 }

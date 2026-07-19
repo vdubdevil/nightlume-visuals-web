@@ -179,68 +179,81 @@ public class Launcher {
         System.out.println(WHITE + "Initializing runtime environment verification..." + RESET);
         sleep(300);
 
-        // Получаем точный абсолютный путь, где запущен наш джарник
-        String currentDir = new File(".").getAbsolutePath();
-        if (currentDir.endsWith(".")) {
-            currentDir = currentDir.substring(0, currentDir.length() - 1);
+        // Получаем строгий абсолютный путь к папке, где запущен джарник
+        File currentDirFile = new File(".");
+        String absolutePath = currentDirFile.getAbsolutePath();
+        if (absolutePath.endsWith(".")) {
+            absolutePath = absolutePath.substring(0, absolutePath.length() - 1);
+        }
+        if (absolutePath.endsWith(File.separator)) {
+            absolutePath = absolutePath.substring(0, absolutePath.length() - 1);
         }
 
-        System.out.println(WHITE + "Working Directory: " + GREEN + currentDir + RESET);
+        System.out.println(WHITE + "Target base directory: " + GREEN + absolutePath + RESET);
 
         String pathSeparator = System.getProperty("path.separator");
 
-        // Собираем пути к папкам
-        File libsFolder = new File("libraries");
-        StringBuilder classpath = new StringBuilder("Nightlume.jar");
-
-        // Явно добавляем каждый .jar из папки libraries в Classpath, чтобы Java их точно увидела
-        if (libsFolder.exists() && libsFolder.isDirectory()) {
-            File[] files = libsFolder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.getName().endsWith(".jar")) {
-                        classpath.append(pathSeparator).append("libraries/").append(file.getName());
-                    }
-                }
-            }
-        }
+        // Формируем абсолютные пути до папок внутри распакованного Runtime
+        String runtimePath = absolutePath + File.separator + "Runtime";
+        String nativePath = runtimePath + File.separator + "libraries" + File.separator + "natives";
+        String clientJarPath = absolutePath + File.separator + "Nightlume.jar";
+        String librariesMask = runtimePath + File.separator + "libraries" + File.separator + "*";
 
         List<String> command = new ArrayList<>();
         command.add("java");
         command.add("-Xmx2G");
-        command.add("-Djava.library.path=libraries/natives");
+
+        // ДОБАВЛЯЕМ ЛОГИРОВАНИЕ ХЭШЕЙ И КЛАССОВ ДЛЯ ОТЛАДКИ КРАША NATIVES
+        command.add("-XX:+ShowCodeDetailsInExceptionMessages");
+
+        command.add("-Djava.library.path=" + nativePath);
         command.add("-cp");
-        command.add(classpath.toString()); // Передаем собранную строку библиотек
+        command.add(clientJarPath + pathSeparator + librariesMask);
         command.add("net.minecraft.client.main.Main");
         command.add("--username");
         command.add("Player_" + (100 + random.nextInt(900)));
         command.add("--version");
         command.add("1.16.5");
         command.add("--gameDir");
-        command.add(".");
+        command.add(runtimePath);
         command.add("--assetsDir");
-        command.add("assets");
+        command.add(runtimePath + File.separator + "assets");
         command.add("--assetIndex");
         command.add("1.16");
 
         System.out.println(GRAY + "Spawning native JVM thread..." + RESET);
+        sleep(400);
 
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
-            pb.directory(new File("."));
+            pb.directory(new File(runtimePath)); // Рабочая директория — строго внутри Runtime
+
+            // ОБЪЕДИНЯЕМ ПОТОК ОШИБОК И СТАНДАРТНЫЙ ВЫВОД (Критично при молчаливых крашах)
+            pb.redirectErrorStream(true);
             pb.inheritIO();
 
             System.out.println(GREEN + "[SUCCESS] Minecraft processes invoked. Handoff complete." + RESET);
             sleep(500);
 
-            pb.start();
+            Process process = pb.start();
+
+            // Ждем завершения процесса, если он упадет сразу
+            int exitCode = process.waitFor();
+
+            if (exitCode != 0) {
+                System.out.println(RED + "\n[CRASH] Minecraft process exited with code: " + exitCode + RESET);
+                System.out.println(WHITE + "If no log is visible above, check 'hs_err_pidXXX.log' file in " + runtimePath + RESET);
+                System.out.println(WHITE + "Press Enter to exit..." + RESET);
+                scanner.nextLine(); // Окно не закроется, пока ты не нажмешь Enter
+            }
+
             System.exit(0);
 
-        } catch (IOException e) {
-            System.out.println(RED + "[ERROR] Failed to execute java command: " + e.getMessage() + RESET);
+        } catch (Exception e) {
+            System.out.println(RED + "[ERROR] Process failed: " + e.getMessage() + RESET);
+            scanner.nextLine();
         }
     }
-
     private static void typeText(String text, int delay) {
         for (char ch : text.toCharArray()) {
             System.out.print(ch);

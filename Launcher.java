@@ -179,12 +179,12 @@ public class Launcher {
         System.out.println(WHITE + "Initializing runtime environment verification..." + RESET);
         sleep(300);
 
-        // Java автоматически берет абсолютный путь к папке, где лежит выполняемый .jar
-        File currentDirFile = new File(Launcher.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        File runtimeFolder = currentDirFile.getParentFile(); // Это папка Runtime
-        String runtimePath = runtimeFolder.getAbsolutePath();
+        String runtimePath = System.getProperty("user.dir");
+        try {
+            runtimePath = java.net.URLDecoder.decode(runtimePath, StandardCharsets.UTF_8.name());
+        } catch (Exception ignored) {}
 
-        // Папка уровнем выше (корень Nightlume в AppData)
+        File runtimeFolder = new File(runtimePath);
         String baseDataPath = runtimeFolder.getParent();
 
         System.out.println(WHITE + "Active environment directory: " + GREEN + runtimePath + RESET);

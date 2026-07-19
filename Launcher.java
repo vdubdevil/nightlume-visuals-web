@@ -40,19 +40,18 @@ public class Launcher {
     }
 
     private static void printAsciiLogo() {
-        String asciiLogo = """
-       .-----------------.
-     .#####################.
-    #######---         ----
-   ####  ..###############..     _   _ _        _     _   _                      
-   #### ####################    | \\ | |(_)    | |   | | | |                     
-   #### ####################    |  \\| |_  __ _| |__ | |_| |_   _ _ __ ___   ___ 
-   #### ####################        | . ` | |/ _` | '_ \\| __| | | | | '_ ` _ \\ / _ \\
-   #### ####################        | |\\  | | (_| | | | | |_| | |_| | | | | | |  __/
-   ####  ''##############''         |_| \\_|_|\\__, |_| |_|\\__|_|\\__,_|_| |_| |_|\\___|
-    #######---         ----                 __/  |                                
-     '####################'                 |___/                                 
-       '-----------------'   """;
+        String asciiLogo = "       .-----------------.\n" +
+                "     .#####################.\n" +
+                "    #######---         ----\n" +
+                "   ####  ..###############..     _   _ _        _     _   _\n" +
+                "   #### ####################    | \\\\ | |(_)    | |   | | | |\n" +
+                "   #### ####################    |  \\\\| |_  __ _| |__ | |_| |_   _ _ __ ___   ___\n" +
+                "   #### ####################        | . ` | |/ _` | '_ \\\\| __| | | | | '_ ` _ \\\\ / _ \\\\\n" +
+                "   #### ####################        | |\\\\  | | (_| | | | | |_| | |_| | | | | | |  __/\n" +
+                "   ####  ''##############''         |_| \\\\_|_|\\__, |_| |_|\\__|_|\\__,_|_| |_| |_|\\___|\n" +
+                "    #######---         ----                 __/  |\n" +
+                "     '####################'                 |___/\n" +
+                "       '-----------------'";
         System.out.println(GREEN + asciiLogo + RESET);
         System.out.print(WHITE + " » CURRENT INSTALLED VERSION: " + RESET);
         System.out.println(GREEN + "1.16.5-Nightlume" + RESET);
@@ -116,16 +115,14 @@ public class Launcher {
 
             switch (command) {
                 case "help":
-                    System.out.println("""
-                        Available Launcher Utility Blocks:
-                        
-                        help       Show this local environment diagnostics helper
-                        status     Display dynamic environment framework status logs
-                        clear      Flush current terminal terminal sequence matrix
-                        date       Print machine tracking runtime clock configuration
-                        version    Print core metadata distribution identity properties
-                        launch     Invoke and launch the Minecraft game process
-                        exit       Terminate local session bindings safely""");
+                    System.out.println("Available Launcher Utility Blocks:\n\n" +
+                            "help       Show this local environment diagnostics helper\n" +
+                            "status     Display dynamic environment framework status logs\n" +
+                            "clear      Flush current terminal terminal sequence matrix\n" +
+                            "date       Print machine tracking runtime clock configuration\n" +
+                            "version    Print core metadata distribution identity properties\n" +
+                            "launch     Invoke and launch the Minecraft game process\n" +
+                            "exit       Terminate local session bindings safely");
                     break;
                 case "status":
                     System.out.println("System Core Launcher Matrix: " + GREEN + "ONLINE // READY TO LAUNCH" + RESET);

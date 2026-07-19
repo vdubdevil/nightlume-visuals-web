@@ -178,27 +178,40 @@ public class Launcher {
     private static void invokeActualLaunch() {
         System.out.println(WHITE + "Initializing runtime environment verification..." + RESET);
         sleep(300);
-        System.out.println(WHITE + "Target game directory: " + GREEN + System.getProperty("user.dir") + RESET);
 
-        // Автоматически определяем разделитель путей (; для Windows, : для Linux)
+        // Получаем абсолютный путь к текущей папке (%AppData%\Nightlume)
+        String absoluteWorkingDir = new File(".").getAbsolutePath();
+        // Избавляемся от точки в конце пути, если она есть
+        if (absoluteWorkingDir.endsWith(".")) {
+            absoluteWorkingDir = absoluteWorkingDir.substring(0, absoluteWorkingDir.length() - 1);
+        }
+        if (absoluteWorkingDir.endsWith(File.separator)) {
+            absoluteWorkingDir = absoluteWorkingDir.substring(0, absoluteWorkingDir.length() - 1);
+        }
+
+        System.out.println(WHITE + "Target game directory: " + GREEN + absoluteWorkingDir + RESET);
+
         String pathSeparator = System.getProperty("path.separator");
+        String nativePath = absoluteWorkingDir + File.separator + "libraries" + File.separator + "natives";
+        String clientJarPath = absoluteWorkingDir + File.separator + "Nightlume.jar";
+        String librariesMask = absoluteWorkingDir + File.separator + "libraries" + File.separator + "*";
 
-        // Формируем команду запуска процесса Майнкрафт 1.16.5
+        // Формируем четкую команду запуска Майнкрафт 1.16.5 с абсолютными путями
         List<String> command = new ArrayList<>();
         command.add("java");
         command.add("-Xmx2G");
-        command.add("-Djava.library.path=libraries/natives");
+        command.add("-Djava.library.path=" + nativePath);
         command.add("-cp");
-        command.add("Nightlume.jar" + pathSeparator + "libraries/*");
+        command.add(clientJarPath + pathSeparator + librariesMask);
         command.add("net.minecraft.client.main.Main");
         command.add("--username");
-        command.add("Player_" + (100 + random.nextInt(900))); // Рандомный ник для теста
+        command.add("Player_" + (100 + random.nextInt(900)));
         command.add("--version");
         command.add("1.16.5");
         command.add("--gameDir");
-        command.add(".");
+        command.add(absoluteWorkingDir);
         command.add("--assetsDir");
-        command.add("assets");
+        command.add(absoluteWorkingDir + File.separator + "assets");
         command.add("--assetIndex");
         command.add("1.16");
 
@@ -207,18 +220,32 @@ public class Launcher {
 
         try {
             ProcessBuilder pb = new ProcessBuilder(command);
-            pb.directory(new File(".")); // Запускаем прямо в текущей папке (.minecraft)
-            pb.inheritIO(); // Пробрасываем логи майна прямо в эту консоль
+            pb.directory(new File(absoluteWorkingDir)); // Принудительно ставим рабочую папку
+
+            // ВАЖНО: Если игра падает, нам нужно перенаправить поток ошибок в консоль, чтобы увидеть лог краша!
+            pb.redirectErrorStream(true);
+            pb.inheritIO();
 
             System.out.println(GREEN + "[SUCCESS] Minecraft processes invoked. Handoff complete." + RESET);
             sleep(500);
 
-            pb.start(); // Стартуем игру
-            System.exit(0); // Закрываем лаунчер, оставляя игру работать
+            Process process = pb.start();
+
+            // Даем игре 1-2 секунды на запуск. Если она сразу упадет — мы успеем прочитать ошибку в консоли
+            sleep(1500);
+
+            // Проверяем, жив ли процесс игры. Если он умер — лаунчер не закроется и покажет логи краша
+            if (!process.isAlive()) {
+                System.out.println(RED + "[CRASH] Minecraft process terminated unexpectedly. Check output above." + RESET);
+                // Даем пользователю нажать Enter, чтобы окно консоли не закрылось сразу
+                System.out.println(WHITE + "Press Enter to exit..." + RESET);
+                scanner.nextLine();
+            }
+
+            System.exit(0);
 
         } catch (IOException e) {
             System.out.println(RED + "[ERROR] Failed to execute java command: " + e.getMessage() + RESET);
-            System.out.println(WHITE + "Please ensure java is added to your environment variables (PATH)." + RESET);
         }
     }
 

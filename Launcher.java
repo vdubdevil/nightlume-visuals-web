@@ -237,6 +237,8 @@ public class Launcher {
         command.add("-cp");
         command.add(clientJarPath + pathSeparator + classpathLibs);
         command.add("net.minecraft.client.main.Main");
+
+        // --- ОБЯЗАТЕЛЬНЫЕ АРГУМЕНТЫ АВТОРИЗАЦИИ МАЙНКРАФТА ---
         command.add("--username");
         command.add("Player_" + (100 + random.nextInt(900)));
         command.add("--version");
@@ -247,6 +249,14 @@ public class Launcher {
         command.add(assetsDir.getAbsolutePath());
         command.add("--assetIndex");
         command.add("1.16");
+
+        // Добавляем то, на чём споткнулся парсер (токен и uuid-заглушки)
+        command.add("--uuid");
+        command.add("00000000-0000-0000-0000-000000000000");
+        command.add("--accessToken");
+        command.add("00000000000000000000000000000000"); // Вот этот бро спасает от краша
+        command.add("--userType");
+        command.add("mojang");
 
         System.out.println(GRAY + "Spawning native JVM thread..." + RESET);
         sleep(400);
